@@ -1,3 +1,4 @@
+from datetime import datetime
 from os.path import exists
 import numpy as np
 import requests
@@ -26,7 +27,7 @@ pwd = environ['PGPASS']
 def refactor_df(dataframe):
     for label in dataframe:
         if label in relabel:
-            df = df.rename(columns={label: relabel[label]})
+            dataframe = dataframe.rename(columns={label: relabel[label]})
 
     labels = ['Province_State', 'Country_Region', 'Last_Update', 'Confirmed', 'Deaths', 'Recovered', 'Active']
 
@@ -43,8 +44,9 @@ if not exists("dataframes.pickle"):
         if data['name'].endswith('.csv'):
             download_urls.append(data['download_url'])
 
+    download_urls.sort(key=lambda x: datetime.strptime(x.split('/')[-1].replace('.csv', ''), '%m-%d-%Y'))
     csv_list = []
-    for csv in download_urls[:10]:  # change this if you want to import more data
+    for csv in download_urls[-10:]:  # change this if you want to import more data
         csv_list.append(refactor_df(pd.read_csv(csv)))
 
     with open('dataframes.pickle', 'wb') as file:
